@@ -1,0 +1,7 @@
+{
+  "name": "MAI Beauty Center",
+  "description": "Centro de belleza elegante en García, N.L. Especialistas en cejas, uñas, depilación y corte de cabello.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
