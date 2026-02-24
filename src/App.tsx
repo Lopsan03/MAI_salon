@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Phone, 
   MessageCircle, 
@@ -20,15 +20,19 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { BUSINESS_INFO, SERVICES, TESTIMONIALS } from './constants';
 
-const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const logoImageUrl = new URL('../images/Logo.png', import.meta.url).href;
+const getWhatsAppUrl = (message: string) =>
+  `https://wa.me/${BUSINESS_INFO.whatsapp}?text=${encodeURIComponent(message)}`;
 
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+const WHATSAPP_MESSAGES = {
+  generalService: 'Hola, me gustaría solicitar información sobre sus servicios y agendar una cita.',
+  directContact: 'Hola, me gustaría recibir información sobre sus servicios.',
+  locationBooking: 'Hola, me gustaría agendar una cita en la sucursal de Plaza Domena.',
+  serviceBooking: (serviceName: string) => `Hola, me gustaría agendar una cita para ${serviceName}.`,
+};
+
+const Navbar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
     { name: 'Inicio', href: '#inicio' },
@@ -39,12 +43,10 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'}`}>
+    <nav className="fixed w-full z-50 transition-all duration-300 bg-white shadow-sm py-3">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <div className="flex items-center">
-          <span className={`text-2xl font-serif font-bold tracking-wider ${isScrolled ? 'text-mai-dark' : 'text-mai-dark'}`}>
-            MAI <span className="text-mai-gold">BEAUTY</span>
-          </span>
+          <img src={logoImageUrl} alt="MAI Beauty logo" className="h-12 w-auto" />
         </div>
 
         {/* Desktop Menu */}
@@ -59,7 +61,7 @@ const Navbar = () => {
             </a>
           ))}
           <a
-            href={`https://wa.me/${BUSINESS_INFO.whatsapp}`}
+            href={getWhatsAppUrl(WHATSAPP_MESSAGES.generalService)}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-mai-dark text-white px-6 py-2 rounded-full hover:bg-mai-gold transition-all duration-300 text-sm font-medium"
@@ -97,7 +99,7 @@ const Navbar = () => {
                 </a>
               ))}
               <a
-                href={`https://wa.me/${BUSINESS_INFO.whatsapp}`}
+                href={getWhatsAppUrl(WHATSAPP_MESSAGES.generalService)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-mai-dark text-white text-center py-3 rounded-full font-medium"
@@ -117,7 +119,7 @@ const Hero = () => {
     <section id="inicio" className="relative h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1920"
+          src={new URL('../images/homePage.png', import.meta.url).href}
           alt="MAI Beauty Center Hero"
           className="w-full h-full object-cover brightness-75"
           referrerPolicy="no-referrer"
@@ -157,7 +159,7 @@ const Hero = () => {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <a
-            href={`https://wa.me/${BUSINESS_INFO.whatsapp}`}
+            href={getWhatsAppUrl(WHATSAPP_MESSAGES.generalService)}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-mai-dark px-8 py-4 rounded-full font-medium hover:bg-mai-gold hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group"
@@ -191,7 +193,7 @@ const About = () => {
           >
             <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
               <img
-                src="https://images.unsplash.com/photo-1527799822340-474058a67bb0?auto=format&fit=crop&q=80&w=800"
+                src={new URL('../images/salon.png', import.meta.url).href}
                 alt="Interior del salón"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
@@ -283,7 +285,7 @@ const Services = () => {
                 </div>
 
                 <a
-                  href={`https://wa.me/${BUSINESS_INFO.whatsapp}?text=Hola, me gustaría agendar una cita para ${service.title}`}
+                  href={getWhatsAppUrl(WHATSAPP_MESSAGES.serviceBooking(service.title))}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-mai-dark text-white py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-mai-gold transition-colors text-sm font-bold"
@@ -407,7 +409,7 @@ const Contact = () => {
                   <p className="text-mai-dark font-medium">{BUSINESS_INFO.phone}</p>
                 </div>
               </a>
-              <a href={`https://wa.me/${BUSINESS_INFO.whatsapp}`} className="flex items-center gap-4 group">
+              <a href={getWhatsAppUrl(WHATSAPP_MESSAGES.directContact)} className="flex items-center gap-4 group">
                 <div className="w-12 h-12 bg-mai-beige rounded-full flex items-center justify-center group-hover:bg-green-500 transition-colors">
                   <MessageCircle className="text-mai-gold group-hover:text-white" size={20} />
                 </div>
@@ -458,6 +460,10 @@ const Contact = () => {
 };
 
 const Location = () => {
+  const mapsQuery = encodeURIComponent(`${BUSINESS_INFO.name}, ${BUSINESS_INFO.address}`);
+  const mapsEmbedUrl = `https://www.google.com/maps?q=${mapsQuery}&output=embed`;
+  const mapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapsQuery}`;
+
   return (
     <section id="ubicacion" className="py-24 bg-mai-beige">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -469,7 +475,7 @@ const Location = () => {
         <div className="grid lg:grid-cols-3 gap-8 items-stretch">
           <div className="lg:col-span-2 rounded-3xl overflow-hidden shadow-lg h-[450px]">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3593.649230553138!2d-100.4855555!3d25.7511111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x866299f8f8f8f8f8%3A0x8f8f8f8f8f8f8f8f!2sPlaza%20Domena!5e0!3m2!1ses!2smx!4v1700000000000!5m2!1ses!2smx"
+              src={mapsEmbedUrl}
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -488,7 +494,7 @@ const Location = () => {
               <p className="text-gray-600 text-sm leading-relaxed">{BUSINESS_INFO.address}</p>
             </div>
             <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=25.7511111,-100.4855555`}
+              href={mapsDirectionsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-mai-dark text-white text-center py-4 rounded-xl font-bold hover:bg-mai-gold transition-colors mb-4"
@@ -496,7 +502,7 @@ const Location = () => {
               CÓMO LLEGAR
             </a>
             <a
-              href={`https://wa.me/${BUSINESS_INFO.whatsapp}`}
+              href={getWhatsAppUrl(WHATSAPP_MESSAGES.locationBooking)}
               target="_blank"
               rel="noopener noreferrer"
               className="border-2 border-mai-dark text-mai-dark text-center py-4 rounded-xl font-bold hover:bg-mai-dark hover:text-white transition-all"
@@ -516,9 +522,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-12 mb-16">
           <div className="md:col-span-1">
-            <span className="text-2xl font-serif font-bold tracking-wider text-mai-dark block mb-6">
-              MAI <span className="text-mai-gold">BEAUTY</span>
-            </span>
+            <img src={logoImageUrl} alt="MAI Beauty logo" className="h-14 w-auto mb-6" />
             <p className="text-gray-500 text-sm leading-relaxed mb-6">
               Realzando tu belleza natural con manos expertas y productos de la más alta calidad.
             </p>
@@ -587,7 +591,7 @@ const WhatsAppButton = () => {
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       whileHover={{ scale: 1.1 }}
-      href={`https://wa.me/${BUSINESS_INFO.whatsapp}`}
+      href={getWhatsAppUrl(WHATSAPP_MESSAGES.generalService)}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-8 right-8 z-50 bg-green-500 text-white p-4 rounded-full shadow-2xl flex items-center justify-center hover:bg-green-600 transition-all duration-300"
